@@ -1,0 +1,73 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
+  "extends": ["ultracite/core"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "noNoninteractiveElementInteractions": "warn",
+        "noStaticElementInteractions": "warn",
+        "useSemanticElements": "warn"
+      },
+      "nursery": {
+        "useSortedClasses": "off"
+      },
+      "style": {
+        "useNamingConvention": "off",
+        "useConsistentTypeDefinitions": "off",
+        "noEnum": "off",
+        "noNestedTernary": "warn",
+        "useBlockStatements": "warn",
+        "useConsistentObjectDefinitions": "warn",
+        "useCollapsedElseIf": "warn",
+        "useForOf": "warn",
+        "useCollapsedIf": "warn",
+        "noNonNullAssertion": "warn",
+        "noUselessElse": "warn",
+        "useNumericSeparators": "warn",
+        "noUnusedTemplateLiteral": "warn"
+      },
+      "suspicious": {
+        "noConsole": "off",
+        "noEmptyBlockStatements": "warn"
+      },
+      "performance": {
+        "noNamespaceImport": "off",
+        "noBarrelFile": "off",
+        "useTopLevelRegex": "warn",
+        "noImgElement": "warn"
+      },
+      "security": {
+        "noSecrets": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off",
+        "useSimplifiedLogicExpression": "warn",
+        "noVoid": "warn",
+        "noForEach": "warn",
+        "useLiteralKeys": "warn"
+      },
+      "correctness": {
+        "noUnusedImports": "off",
+        "noUnusedFunctionParameters": "warn",
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "warn",
+        "useImageSize": "warn"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off",
+        "organizeImports": "off"
+      }
+    }
+  }
+}
