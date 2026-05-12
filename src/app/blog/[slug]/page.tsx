@@ -7,6 +7,8 @@ import type { SnowSEOWebhookPayload } from "@/lib/webhook/types";
 import { HtmlRenderer } from "./markdown-renderer";
 import { WebhookPayloadViewer } from "./webhook-payload-viewer";
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const posts = await listPosts();
   return posts.map((post) => ({
