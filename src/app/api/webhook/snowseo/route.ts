@@ -28,17 +28,21 @@ const TRAILING_SLASH_REGEX = /\/+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    // Read raw body first (so we can store the exact payload) and collect headers
-    const rawBody = await request.text();
+    // Only keep headers that SnowSEO actually sends from the API backend
+    const ALLOWED_HEADERS = new Set([
+      "authorization",
+      "content-type",
+      "user-agent",
+    ]);
     const headersObj: Record<string, string> = {};
     for (const [k, v] of request.headers.entries()) {
-      headersObj[k] = v;
+      if (ALLOWED_HEADERS.has(k.toLowerCase())) {
+        headersObj[k] = k.toLowerCase() === "authorization" ? "REDACTED" : v;
+      }
     }
 
-    // Mask Authorization header for storage
-    if (headersObj.authorization) {
-      headersObj.authorization = "REDACTED";
-    }
+    // Read raw body for payload processing and idempotency
+    const rawBody = await request.text();
 
     if (!webhookConfig.secret) {
       return NextResponse.json(
@@ -180,7 +184,7 @@ async function handleEvent(payload: SnowSEOWebhookPayload): Promise<{
         originalId: article.id,
         featuredImage: article.featuredImage,
         metaData: article.metaData as Record<string, unknown>,
-        publishedAt: isPublished ? new Date() : undefined as Date | undefined,
+        publishedAt: isPublished ? new Date() : (undefined as Date | undefined),
       });
 
       return {
