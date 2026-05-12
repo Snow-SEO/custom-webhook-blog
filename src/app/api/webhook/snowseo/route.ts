@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { SnowSEOWebhookPayload } from "@/lib/webhook/types";
 import { savePost, deletePostById, generateSlug } from "@/lib/webhook/storage";
 import { webhookConfig } from "@/lib/webhook/config";
-import { db, webhookLogs } from "@/lib/db";
+import { db, webhookLogs, eq } from "@/lib/db";
 import { createHash } from "node:crypto";
 
 const TRAILING_SLASH_REGEX = /\/+$/;
@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
         slug: slugCandidate,
         idempotencyKey,
         status: "received",
+        message: `Received ${payload.event} event`,
         rawBody,
         payload: JSON.stringify(payload),
         headers: JSON.stringify(headersObj),
@@ -123,6 +124,19 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await handleEvent(payload);
+
+    // Update webhook log with result message
+    try {
+      await db
+        .update(webhookLogs)
+        .set({
+          status: result.success ? "processed" : "failed",
+          message: result.message ?? null,
+        })
+        .where(eq(webhookLogs.idempotencyKey, idempotencyKey));
+    } catch (err) {
+      console.warn("[Webhook] Failed to update log status:", err);
+    }
 
     const savedPost = result.savedPost;
     if (!savedPost) {
@@ -223,6 +237,19 @@ async function handleEvent(payload: SnowSEOWebhookPayload): Promise<{
         success: true,
         action: "ping",
         message: payload.message || "Webhook connection confirmed",
+        savedPost: null,
+      };
+    }
+
+    case "webhook.disconnected": {
+      console.log(
+        "[Webhook] Integration disconnected from SnowSEO:",
+        payload.message
+      );
+      return {
+        success: true,
+        action: "disconnected",
+        message: payload.message || "Webhook integration removed",
         savedPost: null,
       };
     }

@@ -22,7 +22,8 @@ export type SnowSEOEvent =
   | "article.published"
   | "article.drafted"
   | "article.unpublished"
-  | "webhook.connected";
+  | "webhook.connected"
+  | "webhook.disconnected";
 
 export interface SnowSEOArticleMetaData {
   metaTitle?: string;

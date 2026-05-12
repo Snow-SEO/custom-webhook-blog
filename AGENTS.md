@@ -30,12 +30,13 @@ This demo blog receives and displays content via webhooks from SnowSEO:
 
 ## Webhook Events Handled
 
-| Event                 | Action                                                          |
-| --------------------- | --------------------------------------------------------------- |
-| `article.published`   | Save post with markdown and HTML content                        |
-| `article.drafted`     | Save as draft                                                   |
-| `article.unpublished` | Ask user what to do — delete, archive, or mark unpublished |
-| `webhook.connected`   | Validation ping response                                        |
+| Event                  | Action                                                     |
+| ---------------------- | ---------------------------------------------------------- |
+| `article.published`    | Save post with markdown and HTML content                   |
+| `article.drafted`      | Save as draft                                              |
+| `article.unpublished`  | Ask user what to do — delete, archive, or mark unpublished |
+| `webhook.connected`    | Validation ping response                                   |
+| `webhook.disconnected` | Logged; integration removed from SnowSEO side              |
 
 ## Webhook Payload
 

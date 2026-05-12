@@ -24,6 +24,7 @@ export const webhookLogs = createTable("webhook_logs", {
   slug: text("slug"),
   idempotencyKey: text("idempotency_key"),
   status: text("status"),
+  message: text("message"), // human-readable description of what happened
   // raw body and parsed payload stored as text to avoid DB JSON typing issues
   rawBody: text("raw_body"),
   payload: text("payload"),
