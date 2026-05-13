@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { listPosts } from "@/lib/webhook/storage";
 
 function formatDate(dateStr: string): string {
@@ -21,12 +21,23 @@ export default async function HomePage() {
       {/* Header */}
       <header className="w-full border-b border-zinc-200 dark:border-zinc-800">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <Link
-            href="/logs"
-            className="mb-6 inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            See Webhook Logs <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <a
+              href="https://github.com/Snow-SEO/custom-webhook-blog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Go to GitHub
+            </a>
+            <Link
+              href="/logs"
+              className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              See Webhook Logs <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
             Webhook Blog Demo
           </h1>

@@ -81,7 +81,17 @@ export default function LogsPage() {
     <>
       <FloatingBackButton href="/" />
       <div className="mx-auto max-w-3xl py-12">
-      <h1 className="text-2xl font-semibold">Webhook Logs</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Webhook Logs</h1>
+        <a
+          href="https://github.com/Snow-SEO/custom-webhook-blog"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        >
+          Go to GitHub
+        </a>
+      </div>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
         Recent webhook requests received by this demo. Click a card to view the full payload.
       </p>

@@ -10,6 +10,50 @@ This is a **demo blog** that showcases:
 - HTML content rendering from webhook payloads
 - Event-driven content management (publish, draft, best-effort unpublish)
 
+## Integrate it with AI
+
+Use the prompt below in your AI assistant/agent to generate a complete, runnable webhook receiver for the current codebase.
+
+Copy-paste prompt:
+
+```
+You are an expert developer. Fetch and inspect https://github.com/Snow-SEO/custom-webhook-blog to determine the app's exact stack, file structure, and conventions. Use it as the reference implementation for this task.
+
+Implement a complete webhook integration for SnowSEO content generation in this codebase.
+
+Goal:
+- Add or improve the webhook receiver so it accepts SnowSEO webhooks, persists content, and is ready for production use in this codebase.
+- The solution must be runnable in this repository with minimal changes.
+- Infer framework choices, file paths, or placeholders from the codebase.
+
+Required behavior:
+- Accept `article.published`, `article.drafted`, `article.unpublished`, `webhook.connected`, and `webhook.disconnected`.
+- Save the full payload, including the raw request body, so the exact event can be reviewed later.
+- For `article.published` and `article.drafted`, upsert the article content and metadata.
+- For `article.unpublished`, ask the user what action to take — the receiver should not delete content silently. Common options include: hard delete the post, archive/soft-delete it (set a `deletedAt` timestamp), or mark it as unpublished in the DB. Return the chosen action in the response.
+- For `webhook.connected` and `webhook.disconnected`, return a simple successful acknowledgement.
+- Validate the `Authorization: Bearer <secret>` header against a shared env var such as `SNOWSEO_WEBHOOK_SECRET`.
+- If the repo uses example env files, update them and tell the user to paste the SnowSEO secret into the correct env var.
+- Use the repository's existing conventions for storage, validation, logging, and tests.
+- Add any missing local docs or examples so a developer can understand how to connect their agent or app.
+
+Deliverables:
+- Update the relevant source files in this repo.
+- Add or update README guidance where helpful.
+
+On `article.published` and `article.drafted` events, return a JSON response that includes:
+- **`cmsArticleId`** (string, optional) — a unique identifier for the published article (e.g. database ID, CMS post ID). SnowSEO stores this to link future updates to the correct article.
+- **`cmsUrl`** (string, optional) — the public live URL of the article (e.g. `https://your-blog.com/blog/my-article`). SnowSEO uses this for the "Preview Live" link in the dashboard.
+
+If a receiver doesn't track IDs or URLs, it can return an empty successful response — the webhook will still appear as published in SnowSEO.
+
+If there is an existing webhook receiver, extend it instead of creating a duplicate.
+If the repo already has tests, add or update the nearest relevant test.
+Keep the implementation concise, idiomatic, and production-safe.
+
+Refer to the reference repo's README for full payload shapes, response expectations, and webhook event details.
+```
+
 ## Getting Started
 
 ### Prerequisites
@@ -82,12 +126,13 @@ src/
 
 ## Webhook Events
 
-| Event                 | Description                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| `article.published`   | Save post with markdown and HTML content                                                                 |
-| `article.drafted`     | Save post as draft                                                                                       |
-| `article.unpublished` | Optional but recommended best-effort delete from remote targets; always keep local SnowSEO state in sync |
-| `webhook.connected`   | Validation ping that still requires auth                                                                 |
+| Event                  | Description                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `article.published`    | Save post with markdown and HTML content                                                                 |
+| `article.drafted`      | Save post as draft                                                                                       |
+| `article.unpublished`  | Optional but recommended best-effort delete from remote targets; always keep local SnowSEO state in sync |
+| `webhook.connected`    | Validation ping that still requires auth                                                                 |
+| `webhook.disconnected` | Sent when the integration is removed from SnowSEO (e.g. webhook removed from dashboard)                  |
 
 ## Webhook Payload
 
@@ -120,7 +165,7 @@ SnowSEO sends a JSON payload with both markdown and HTML content:
 }
 ```
 
-The receiver also accepts the `webhook.connected` validation ping, but that request still requires the same bearer token.
+The receiver also accepts the `webhook.connected` and `webhook.disconnected` events, but both require the same bearer token auth.
 
 ### Response Expectations
 
@@ -130,19 +175,6 @@ On `article.published` and `article.drafted` events, SnowSEO reads the response 
 - **`cmsUrl`** (string, optional) — The public live URL of the published article. When present, SnowSEO stores it on the article record and uses it for the "Preview Live" link in the UI.
 
 If either field is not returned, SnowSEO leaves the corresponding article metadata untouched. For webhook receivers that don't track article IDs or URLs, returning an empty successful response is sufficient — the webhook will still appear as "published" in SnowSEO.
-
-**Example response:**
-
-```json
-{
-  "success": true,
-  "slug": "my-article",
-  "action": "published",
-  "message": "Post saved successfully",
-  "cmsArticleId": "123",
-  "cmsUrl": "https://my-blog.com/blog/my-article"
-}
-```
 
 **Fields:**
 
@@ -207,78 +239,3 @@ If the bearer token is missing or does not match `SNOWSEO_WEBHOOK_SECRET`, the r
 - **Styling**: Tailwind CSS v4
 - **Database**: PostgreSQL with Drizzle ORM
 - **Linting**: Biome
-
-## Integrate it with AI!
-
-Use the prompt below in your AI assistant/agent to generate a complete, runnable webhook receiver for the current codebase. It is intentionally general: the agent should inspect the repository, infer the stack, implement the webhook receiver, and wire it up without asking the user for placeholders or extra setup details.
-
-Copy-paste prompt:
-
-````
-You are an expert developer. Inspect this repository, determine the app's stack and structure, and implement a complete webhook integration for SnowSEO content generation.
-
-Goal:
-- Add or improve the webhook receiver so it accepts SnowSEO webhooks, persists content, and is ready for production use in this codebase.
-- The solution must be runnable in this repository with minimal changes.
-- Infer framework choices, file paths, or placeholders. from the codebase.
-
-Required behavior:
-- Accept `article.published`, `article.drafted`, `article.unpublished`, and `webhook.connected`.
-- Save the full payload, including the raw request body, so the exact event can be reviewed later.
-- For `article.published` and `article.drafted`, upsert the article content and metadata.
-- For `article.unpublished`, ask the user what action to take — the receiver should not delete content silently. Common options include: hard delete the post, archive/soft-delete it (set a `deletedAt` timestamp), or mark it as unpublished in the DB. Return the chosen action in the response.
-- For `webhook.connected`, return a simple successful acknowledgement.
-- Validate the `Authorization: Bearer <secret>` header against a shared env var such as `SNOWSEO_WEBHOOK_SECRET` or `WEBHOOK_SECRET`.
-- If the repo uses env example files, update them and clearly tell the user to paste the SnowSEO-provided secret into that variable in their actual env file.
-- Use the repository's existing conventions for storage, validation, logging, and tests.
-- Add any missing local docs or examples so a developer can understand how to connect their agent or app.
-
-Deliverables:
-- Update the relevant source files in this repo.
-- Add or update README guidance where helpful.
-
-On `article.published` and `article.drafted` events, return a JSON response that includes:
-- **`cmsArticleId`** (string, optional) — a unique identifier for the published article (e.g. database ID, CMS post ID). SnowSEO stores this to link future updates to the correct article.
-- **`cmsUrl`** (string, optional) — the public live URL of the article (e.g. `https://your-blog.com/blog/my-article`). SnowSEO uses this for the "Preview Live" link in the dashboard.
-
-If a receiver doesn't track IDs or URLs, it can return an empty successful response — the webhook will still appear as published in SnowSEO.
-
-Sample webhook payload:
-
-```json
-{
-  "event": "article.published",
-  "timestamp": "2026-05-01T00:00:00Z",
-  "article": {
-    "slug": "test-post",
-    "title": "Test Post",
-    "markdown": "# Hello\n\nThis is the **markdown** content.",
-    "html": "<h1>Hello</h1><p>This is the <strong>html</strong> content.</p>",
-    "status": "publish",
-    "featuredImage": { "url": "https://example.com/image.jpg", "caption": "Test image" },
-    "metaData": { "metaDescription": "Test excerpt" }
-  }
-}
-````
-
-Sample response:
-
-```json
-{
-  "success": true,
-  "slug": "test-post",
-  "action": "published",
-  "message": "Post saved successfully",
-  "cmsArticleId": "123",
-  "cmsUrl": "https://your-blog.com/blog/test-post"
-}
-```
-
-If there is an existing webhook receiver, extend it instead of creating a duplicate.
-If the repo already has tests, add or update the nearest relevant test.
-Keep the implementation concise, idiomatic, and production-safe.
-
-```
-
-Tip: the agent should infer everything it needs from this repository, so you do not have to provide framework names, file paths, or placeholder values.
-```
